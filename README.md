@@ -34,7 +34,7 @@ Use `.NET user-secrets` to store **OpenAI API keys**.
 
 ```bash
 dotnet user-secrets init
-dotnet user-secrets set "OpenAI:ChatModelId" "gpt-4o"
+dotnet user-secrets set "OpenAI:ChatModelId" "gpt-4o-mini"
 dotnet user-secrets set "OpenAI:ApiKey" "your-openai-api-key"
 ```
 

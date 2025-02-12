@@ -18,7 +18,6 @@ if (modelId == null || apiKey == null)
     Environment.Exit(0);
 }
 
-
 var builder = Kernel.CreateBuilder().AddOpenAIChatCompletion(modelId, apiKey);
 
 builder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Trace));
