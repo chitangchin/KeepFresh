@@ -3,10 +3,21 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.Extensions.Configuration;
 
+var config = new ConfigurationBuilder()
+    .AddUserSecrets<Program>()
+    .Build();
 
-var modelId = "gpt-4o-mini";
-var apiKey = "";
+string? modelId = config["OpenAI:ChatModelId"];
+string? apiKey = config["OpenAI:ApiKey"];
+
+if (modelId == null || apiKey == null)
+{
+    Console.WriteLine("Please configure your Model ID and API Key");
+    Environment.Exit(0);
+}
+
 
 var builder = Kernel.CreateBuilder().AddOpenAIChatCompletion(modelId, apiKey);
 
