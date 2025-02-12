@@ -20,7 +20,7 @@ Kernel kernel = builder.Build();
 var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
 // Add a plugin (the LightsPlugin class is defined below)
-kernel.Plugins.AddFromType<FoodsPlugin>("Foods");
+kernel.Plugins.AddFromType<fridgeEcosystem.FoodsPlugin>("Foods");
 
 // Enable planning
 OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new() 

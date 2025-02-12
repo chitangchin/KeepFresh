@@ -2,46 +2,69 @@ using System.ComponentModel;
 using System.Text.Json.Serialization;
 using Microsoft.SemanticKernel;
 
-public class FoodsPlugin
+namespace fridgeEcosystem
 {
-    private readonly List<FoodModel> foods = 
-    [
-        new FoodModel { Id = 1, Name = "Banana", Qty = 10 },
-        new FoodModel { Id = 2, Name = "Apple", Qty = 12},
-        new FoodModel { Id = 3, Name = "Strawberry", Qty = 5}
-    ];
-    
-    [KernelFunction("get_food")]
-    [Description("Seeing whats in the fridge")]
-    public async Task<List<FoodModel>> GetFoodAsync()
+    //We will define the get/put/delete functions for our fridge here
+    public class FoodsPlugin
     {
-        await Task.CompletedTask;
-        return foods;
-    }
+        private readonly List<FoodModel> foods = [];
 
-    [KernelFunction("eat_food")]
-    [Description("Eating a food from fridge")]
-    public async Task<FoodModel?> EatFoodAsync(int id, int qty)
-    {
-        await Task.CompletedTask;
-        var food = foods.FirstOrDefault(food => food.Id == id);
-        if (food == null)
+        [KernelFunction("get_food")]
+        [Description("Seeing whats in the fridge")]
+        public async Task<List<FoodModel>> GetFoodAsync()
         {
-            return null;
+            await Task.CompletedTask;
+            return foods;
         }
-        food.Qty = qty - 1;
-        return food;
+
+        [KernelFunction("add_food")]
+        [Description("Add a food to the fridge")]
+        public async Task<FoodModel> AddFoodAsync(int id, string name, int qty)
+        {
+            await Task.CompletedTask;
+
+            var food = foods.FirstOrDefault(f => f.Id == id);
+
+            if (food != null)
+            {
+                food.Qty += qty;
+            }
+            else
+            {
+                food = new FoodModel { Id = id, Name = name, Qty = qty };
+                foods.Add(food);
+            }
+            return food;
+        }
+
+        [KernelFunction("eat_food")]
+        [Description("Eating a food from fridge")]
+        public async Task<FoodModel?> EatFoodAsync(int id, int qty)
+        {
+            await Task.CompletedTask;
+            var food = foods.FirstOrDefault(f => f.Id == id);
+
+            if (food == null)
+            {
+                return null;
+            }
+
+            // Prevent our food from getting below 0
+            food.Qty = Math.Max(0, food.Qty - qty);
+
+            return food;
+        }
     }
-}
 
-public class FoodModel
-{
-    [JsonPropertyName("id")]
-    public int Id { get; set; }
+    public class FoodModel
+    {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
 
-    [JsonPropertyName("name")]
-    public required string Name { get; set; }
+        [JsonPropertyName("name")]
+        public required string Name { get; set; }
 
-    [JsonPropertyName("is_on")]
-    public int Qty { get; set; }
+        [JsonPropertyName("qty")]
+        public int Qty { get; set; }
+    }
 }
