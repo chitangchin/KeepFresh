@@ -7,11 +7,12 @@ namespace fridgeEcosystem
     //We will define the get/put/delete functions for our fridge here
     public class FoodsPlugin
     {
-        private readonly List<FoodModel> foods = [];
+        private readonly Dictionary<string,Queue<int>> foods = [];
+        //Keep track of food first in first out => queue structure
 
         [KernelFunction("get_food")]
         [Description("Seeing whats in the fridge")]
-        public async Task<List<FoodModel>> GetFoodAsync()
+        public async Task<Dictionary<string, Queue<int>>> GetFoodAsync()
         {
             await Task.CompletedTask;
             return foods;
@@ -19,52 +20,35 @@ namespace fridgeEcosystem
 
         [KernelFunction("add_food")]
         [Description("Add a food to the fridge")]
-        public async Task<FoodModel> AddFoodAsync(int id, string name, int qty)
+        public async Task<bool> AddFoodAsync(string name, int id)
         {
             await Task.CompletedTask;
 
-            var food = foods.FirstOrDefault(f => f.Id == id);
-
-            if (food != null)
+            if (foods.ContainsKey(name))
             {
-                food.Qty += qty;
+                foods[name].Enqueue(id);
             }
             else
             {
-                food = new FoodModel { Id = id, Name = name, Qty = qty };
-                foods.Add(food);
+                foods[name] = new Queue<int>(id);
             }
-            return food;
+            return true;
         }
 
-        [KernelFunction("eat_food")]
-        [Description("Eating a food from fridge")]
-        public async Task<FoodModel?> EatFoodAsync(int id, int qty)
+        [KernelFunction("remove_food")]
+        [Description("Removing a food from fridge")]
+        public async Task<bool> RemoveFoodAsync(string name)
         {
             await Task.CompletedTask;
-            var food = foods.FirstOrDefault(f => f.Id == id);
 
-            if (food == null)
+            if (foods.TryGetValue(name, out Queue<int>? val))
             {
-                return null;
+                // Prevent our food from getting below 0
+                int id = val.Dequeue();
+                return true;
             }
 
-            // Prevent our food from getting below 0
-            food.Qty = Math.Max(0, food.Qty - qty);
-
-            return food;
+            return false;
         }
-    }
-
-    public class FoodModel
-    {
-        [JsonPropertyName("id")]
-        public int Id { get; set; }
-
-        [JsonPropertyName("name")]
-        public required string Name { get; set; }
-
-        [JsonPropertyName("qty")]
-        public int Qty { get; set; }
     }
 }
